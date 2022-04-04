@@ -1,0 +1,2122 @@
+diff -uNr fvwm-2.2.4/Makefile.in fvwm-2.2.4.utf/Makefile.in
+--- fvwm-2.2.4/Makefile.in	Tue Nov 30 10:02:37 1999
++++ fvwm-2.2.4.utf/Makefile.in	Sat Apr  7 17:04:28 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ AUTOMAKE_OPTIONS = 1.4
+ 
+@@ -278,7 +280,7 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+diff -uNr fvwm-2.2.4/acconfig.h fvwm-2.2.4.utf/acconfig.h
+--- fvwm-2.2.4/acconfig.h	Wed Jan 20 02:04:41 1999
++++ fvwm-2.2.4.utf/acconfig.h	Sat Apr  7 15:51:45 2001
+@@ -9,6 +9,9 @@
+ /* Define if rplay library is used.  */
+ #undef HAVE_RPLAY
+ 
++/* Define if Xutf8 library is used.  */
++#undef HAVE_XUTF
++
+ /* Define if readline is available.  */
+ #undef HAVE_READLINE
+ 
+diff -uNr fvwm-2.2.4/config.h.in fvwm-2.2.4.utf/config.h.in
+--- fvwm-2.2.4/config.h.in	Wed Jan 20 02:04:42 1999
++++ fvwm-2.2.4.utf/config.h.in	Sat Apr  7 15:51:50 2001
+@@ -10,6 +10,9 @@
+ /* Define if rplay library is used.  */
+ #undef HAVE_RPLAY
+ 
++/* Define if Xutf8 library is used.  */
++#undef HAVE_XUTF
++
+ /* Define if readline is available.  */
+ #undef HAVE_READLINE
+ 
+diff -uNr fvwm-2.2.4/configure fvwm-2.2.4.utf/configure
+--- fvwm-2.2.4/configure	Mon Nov 29 10:07:03 1999
++++ fvwm-2.2.4.utf/configure	Sat Apr  7 17:04:28 2001
+@@ -3518,7 +3518,7 @@
+ int main() {
+ 
+ /* Ultrix mips cc rejects this.  */
+-typedef int charset[2]; const charset x;
++typedef int charset[2]; const charset x = {0,0};
+ /* SunOS 4.1.1 cc rejects this.  */
+ char const *const *ccp;
+ char **p;
+@@ -3593,7 +3593,7 @@
+ #include "confdefs.h"
+ 
+ int main() {
+-} $ac_kw foo() {
++} int $ac_kw foo() {
+ ; return 0; }
+ EOF
+ if { (eval echo configure:3600: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+@@ -5076,6 +5076,58 @@
+ 
+ 
+ 
++xutf_LIBS=
++xutf_CFLAGS=
++echo $ac_n "checking for XUtf8IsNonSpacing in -lXutf8""... $ac_c" 1>&6
++echo "configure:5083: checking for XUtf8IsNonSpacing in -lXutf8" >&5
++ac_lib_var=`echo Xutf8'_'XUtf8IsNonSpacing | sed 'y%./+-%__p_%'`
++if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
++  echo $ac_n "(cached) $ac_c" 1>&6
++else
++  ac_save_LIBS="$LIBS"
++LIBS="-lXutf8 \
++        $X_LIBS $X_PRE_LIBS -lX11 $X_EXTRA_LIBS $LIBS"
++cat > conftest.$ac_ext <<EOF
++#line 5092 "configure"
++#include "confdefs.h"
++/* Override any gcc2 internal prototype to avoid an error.  */
++/* We use char because int might match the return type of a gcc2
++    builtin and then its argument prototype would still apply.  */
++char XUtf8IsNonSpacing();
++
++int main() {
++XUtf8IsNonSpacing()
++; return 0; }
++EOF
++if { (eval echo configure:5103: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
++  rm -rf conftest*
++  eval "ac_cv_lib_$ac_lib_var=yes"
++else
++  echo "configure: failed program was:" >&5
++  cat conftest.$ac_ext >&5
++  rm -rf conftest*
++  eval "ac_cv_lib_$ac_lib_var=no"
++fi
++rm -f conftest*
++LIBS="$ac_save_LIBS"
++
++fi
++if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
++  echo "$ac_t""yes" 1>&6
++  \
++        cat >> confdefs.h <<\EOF
++#define HAVE_XUTF 1
++EOF
++ xutf_LIBS=" -lXutf8"
++else
++  echo "$ac_t""no" 1>&6
++fi
++
++
++
++
++
++
+ trap '' 1 2 15
+ cat > confcache <<\EOF
+ # This file is a shell script that caches the results of configure
+@@ -5283,6 +5335,8 @@
+ s%@rplay_CFLAGS@%$rplay_CFLAGS%g
+ s%@readline_LIBS@%$readline_LIBS%g
+ s%@readline_CFLAGS@%$readline_CFLAGS%g
++s%@xutf_LIBS@%$xutf_LIBS%g
++s%@xutf_CFLAGS@%$xutf_CFLAGS%g
+ 
+ CEOF
+ EOF
+diff -uNr fvwm-2.2.4/configure.in fvwm-2.2.4.utf/configure.in
+--- fvwm-2.2.4/configure.in	Tue Oct 19 14:26:24 1999
++++ fvwm-2.2.4.utf/configure.in	Sat Apr  7 17:01:13 2001
+@@ -269,6 +269,17 @@
+ AC_SUBST(readline_LIBS)
+ AC_SUBST(readline_CFLAGS)
+ 
++dnl Test to see if libXutf8 is on this machine:
++xutf_LIBS=
++xutf_CFLAGS=
++AC_CHECK_LIB(Xutf8, XUtf8IsNonSpacing, \
++        AC_DEFINE(HAVE_XUTF) xutf_LIBS=" -lXutf8", ,\
++        [$X_LIBS $X_PRE_LIBS -lX11 $X_EXTRA_LIBS])
++
++AC_SUBST(xutf_LIBS)
++AC_SUBST(xutf_CFLAGS)
++
++
+ AC_OUTPUT(Makefile libs/Makefile fvwm/Makefile modules/Makefile
+ extras/Makefile utils/Makefile docs/Makefile
+ icons/Makefile sample.fvwmrc/Makefile tests/Makefile
+diff -uNr fvwm-2.2.4/docs/Makefile.in fvwm-2.2.4.utf/docs/Makefile.in
+--- fvwm-2.2.4/docs/Makefile.in	Tue Nov 30 10:04:14 1999
++++ fvwm-2.2.4.utf/docs/Makefile.in	Sat Apr  7 17:06:27 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ EXTRA_DIST = ANNOUNCE BUGS DEVELOPERS FAQ TODO Y2K-Compliance 	color_combos error_codes fvwm.lsm		m4_hacks black-stone1.jpg fvwm.gif fvwm_smaller.gif		run_man2html.sh txt2html.sh $(HTML)
+ 
+@@ -119,7 +121,7 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+diff -uNr fvwm-2.2.4/extras/FvwmCommand/Makefile.in fvwm-2.2.4.utf/extras/FvwmCommand/Makefile.in
+--- fvwm-2.2.4/extras/FvwmCommand/Makefile.in	Tue Nov 30 10:03:56 1999
++++ fvwm-2.2.4.utf/extras/FvwmCommand/Makefile.in	Sat Apr  7 19:27:00 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ bin_PROGRAMS = FvwmCommand
+ 
+@@ -310,18 +312,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-FvwmCommand.o: FvwmCommand.c FvwmCommand.h ../../config.h \
+-	../../libs/fvwmlib.h ../../fvwm/module.h
+-FvwmCommandS.o: FvwmCommandS.c FvwmCommand.h ../../config.h \
+-	../../libs/fvwmlib.h ../../fvwm/module.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/extras/FvwmConfig/Makefile.in fvwm-2.2.4.utf/extras/FvwmConfig/Makefile.in
+--- fvwm-2.2.4/extras/FvwmConfig/Makefile.in	Tue Nov 30 10:03:58 1999
++++ fvwm-2.2.4.utf/extras/FvwmConfig/Makefile.in	Sat Apr  7 19:26:58 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmConfig
+@@ -276,27 +278,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-dead.o: dead.c
+-FvwmConfig.o: FvwmConfig.C ../../config.h WinBase.h WinButton.h \
+-	WinText.h WinInput.h WinColorSelector.h WinSlider.h \
+-	../../libs/fvwmlib.h ../../fvwm/module.h
+-WinBase.o: WinBase.C ../../config.h WinBase.h
+-WinButton.o: WinButton.C WinButton.h WinText.h WinBase.h
+-WinColorSelector.o: WinColorSelector.C WinBase.h WinColorSelector.h \
+-	WinSlider.h
+-WinInput.o: WinInput.C WinInput.h WinText.h WinBase.h
+-WinRadioButton.o: WinRadioButton.C WinRadioButton.h WinButton.h \
+-	WinText.h WinBase.h
+-WinSlider.o: WinSlider.C WinBase.h WinSlider.h
+-WinText.o: WinText.C WinBase.h WinButton.h WinText.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/extras/FvwmConsole/Makefile.in fvwm-2.2.4.utf/extras/FvwmConsole/Makefile.in
+--- fvwm-2.2.4/extras/FvwmConsole/Makefile.in	Tue Nov 30 10:04:00 1999
++++ fvwm-2.2.4.utf/extras/FvwmConsole/Makefile.in	Sat Apr  7 19:26:56 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmConsole FvwmConsoleC
+@@ -301,20 +303,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-FvwmConsoleC.o: FvwmConsoleC.c FvwmConsole.h ../../config.h \
+-	../../libs/fvwmlib.h ../../fvwm/module.h
+-FvwmConsole.o: FvwmConsole.c FvwmConsole.h ../../config.h \
+-	../../libs/fvwmlib.h ../../fvwm/module.h
+-getline.o: getline.c FvwmConsole.h ../../config.h ../../libs/fvwmlib.h \
+-	../../fvwm/module.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/extras/FvwmDebug/Makefile.in fvwm-2.2.4.utf/extras/FvwmDebug/Makefile.in
+--- fvwm-2.2.4/extras/FvwmDebug/Makefile.in	Tue Nov 30 10:04:01 1999
++++ fvwm-2.2.4.utf/extras/FvwmDebug/Makefile.in	Sat Apr  7 19:26:55 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmDebug
+@@ -267,16 +269,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-FvwmDebug.o: FvwmDebug.c ../../config.h ../../fvwm/module.h FvwmDebug.h \
+-	../../libs/fvwmlib.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/extras/FvwmGoodStuff/Makefile.in fvwm-2.2.4.utf/extras/FvwmGoodStuff/Makefile.in
+--- fvwm-2.2.4/extras/FvwmGoodStuff/Makefile.in	Tue Nov 30 10:04:03 1999
++++ fvwm-2.2.4.utf/extras/FvwmGoodStuff/Makefile.in	Sat Apr  7 19:26:53 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmGoodStuff
+@@ -265,17 +267,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-FvwmGoodStuff.o: FvwmGoodStuff.c ../../config.h ../../fvwm/module.h \
+-	FvwmGoodStuff.h ../../libs/fvwmlib.h
+-icons.o: icons.c ../../config.h FvwmGoodStuff.h ../../libs/fvwmlib.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/extras/FvwmPipe/Makefile.in fvwm-2.2.4.utf/extras/FvwmPipe/Makefile.in
+--- fvwm-2.2.4/extras/FvwmPipe/Makefile.in	Sat Apr  7 18:26:27 2001
++++ fvwm-2.2.4.utf/extras/FvwmPipe/Makefile.in	Sat Apr  7 19:26:51 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmPipe
+@@ -267,7 +269,7 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+diff -uNr fvwm-2.2.4/extras/FvwmScript/Makefile.in fvwm-2.2.4.utf/extras/FvwmScript/Makefile.in
+--- fvwm-2.2.4/extras/FvwmScript/Makefile.in	Tue Nov 30 10:04:05 1999
++++ fvwm-2.2.4.utf/extras/FvwmScript/Makefile.in	Sat Apr  7 19:26:45 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ SUBDIRS = Scripts Widgets
+ 
+@@ -342,7 +344,7 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+@@ -359,16 +361,6 @@
+ 	      || exit 1; \
+ 	  fi; \
+ 	done
+-FvwmScript.o: FvwmScript.c types.h ../../config.h ../../fvwm/module.h \
+-	../../libs/fvwmlib.h
+-Instructions.o: Instructions.c types.h ../../config.h \
+-	../../fvwm/module.h ../../libs/fvwmlib.h
+-libyywrap.o: libyywrap.c
+-scanner.o: scanner.c script.h types.h ../../config.h ../../fvwm/module.h \
+-	../../libs/fvwmlib.h
+-script.o: script.c types.h ../../config.h ../../fvwm/module.h \
+-	../../libs/fvwmlib.h
+-
+ info-am:
+ info: info-recursive
+ dvi-am:
+diff -uNr fvwm-2.2.4/extras/FvwmScript/Scripts/Makefile.in fvwm-2.2.4.utf/extras/FvwmScript/Scripts/Makefile.in
+--- fvwm-2.2.4/extras/FvwmScript/Scripts/Makefile.in	Tue Nov 30 10:04:06 1999
++++ fvwm-2.2.4.utf/extras/FvwmScript/Scripts/Makefile.in	Sat Apr  7 19:26:49 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ SUBDIRS = some_nice_icons
+ 
+@@ -204,7 +206,7 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+diff -uNr fvwm-2.2.4/extras/FvwmScript/Scripts/some_nice_icons/Makefile.in fvwm-2.2.4.utf/extras/FvwmScript/Scripts/some_nice_icons/Makefile.in
+--- fvwm-2.2.4/extras/FvwmScript/Scripts/some_nice_icons/Makefile.in	Tue Nov 30 10:04:07 1999
++++ fvwm-2.2.4.utf/extras/FvwmScript/Scripts/some_nice_icons/Makefile.in	Sat Apr  7 19:26:50 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ EXTRA_DIST = bell.xpm date.xpm desktop.xpm display.xpm keyboard.xpm 	   menu.xpm pointer.xpm shutdown.xpm small.Paint2.xpm 	   small.Shell2.xpm small.exit.xpm small.lock.xpm 	   small.man.next.xpm small.note.next.xpm small.tools2_3d.xpm 	   window.xpm
+ 
+@@ -116,7 +118,7 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+diff -uNr fvwm-2.2.4/extras/FvwmScript/Widgets/Makefile.in fvwm-2.2.4.utf/extras/FvwmScript/Widgets/Makefile.in
+--- fvwm-2.2.4/extras/FvwmScript/Widgets/Makefile.in	Tue Nov 30 10:04:09 1999
++++ fvwm-2.2.4.utf/extras/FvwmScript/Widgets/Makefile.in	Sat Apr  7 19:26:47 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ noinst_LIBRARIES = libWidgets.a
+ 
+@@ -204,48 +206,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-CheckBox.o: CheckBox.c Tools.h ../types.h ../../../config.h \
+-	../../../fvwm/module.h ../../../libs/fvwmlib.h
+-HDipstick.o: HDipstick.c Tools.h ../types.h ../../../config.h \
+-	../../../fvwm/module.h ../../../libs/fvwmlib.h
+-HScrollBar.o: HScrollBar.c Tools.h ../types.h ../../../config.h \
+-	../../../fvwm/module.h ../../../libs/fvwmlib.h
+-ItemDraw.o: ItemDraw.c Tools.h ../types.h ../../../config.h \
+-	../../../fvwm/module.h ../../../libs/fvwmlib.h
+-List.o: List.c Tools.h ../types.h ../../../config.h \
+-	../../../fvwm/module.h ../../../libs/fvwmlib.h
+-Menu.o: Menu.c Tools.h ../types.h ../../../config.h \
+-	../../../fvwm/module.h ../../../libs/fvwmlib.h
+-MiniScroll.o: MiniScroll.c Tools.h ../types.h ../../../config.h \
+-	../../../fvwm/module.h ../../../libs/fvwmlib.h
+-PopupMenu.o: PopupMenu.c Tools.h ../types.h ../../../config.h \
+-	../../../fvwm/module.h ../../../libs/fvwmlib.h
+-PushButton.o: PushButton.c Tools.h ../types.h ../../../config.h \
+-	../../../fvwm/module.h ../../../libs/fvwmlib.h
+-RadioButton.o: RadioButton.c Tools.h ../types.h ../../../config.h \
+-	../../../fvwm/module.h ../../../libs/fvwmlib.h
+-Rectangle.o: Rectangle.c Tools.h ../types.h ../../../config.h \
+-	../../../fvwm/module.h ../../../libs/fvwmlib.h
+-Swallow.o: Swallow.c Tools.h ../types.h ../../../config.h \
+-	../../../fvwm/module.h ../../../libs/fvwmlib.h
+-TextField.o: TextField.c Tools.h ../types.h ../../../config.h \
+-	../../../fvwm/module.h ../../../libs/fvwmlib.h
+-Tools.o: Tools.c Tools.h ../types.h ../../../config.h \
+-	../../../fvwm/module.h ../../../libs/fvwmlib.h
+-VDipstick.o: VDipstick.c Tools.h ../types.h ../../../config.h \
+-	../../../fvwm/module.h ../../../libs/fvwmlib.h
+-VScrollBar.o: VScrollBar.c Tools.h ../types.h ../../../config.h \
+-	../../../fvwm/module.h ../../../libs/fvwmlib.h
+-Widget.o: Widget.c Tools.h ../types.h ../../../config.h \
+-	../../../fvwm/module.h ../../../libs/fvwmlib.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/extras/FvwmTaskBar/Makefile.in fvwm-2.2.4.utf/extras/FvwmTaskBar/Makefile.in
+--- fvwm-2.2.4/extras/FvwmTaskBar/Makefile.in	Tue Nov 30 10:04:10 1999
++++ fvwm-2.2.4.utf/extras/FvwmTaskBar/Makefile.in	Sat Apr  7 19:26:44 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmTaskBar
+@@ -268,26 +270,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-ButtonArray.o: ButtonArray.c ../../libs/fvwmlib.h ButtonArray.h \
+-	Mallocs.h
+-Colors.o: Colors.c ../../config.h Colors.h
+-FvwmTaskBar.o: FvwmTaskBar.c ../../config.h ../../fvwm/module.h \
+-	../../libs/fvwmlib.h FvwmTaskBar.h ../../fvwm/fvwm.h \
+-	../../fvwm/../libs/fvwmlib.h ../../fvwm/fvwmdebug.h \
+-	ButtonArray.h List.h Colors.h Mallocs.h Goodies.h Start.h
+-Goodies.o: Goodies.c ../../config.h ../../libs/fvwmlib.h Goodies.h \
+-	minimail.xbm
+-List.o: List.c ../../config.h List.h Mallocs.h ../../fvwm/module.h
+-Mallocs.o: Mallocs.c ../../config.h ../../libs/fvwmlib.h
+-Start.o: Start.c ../../libs/fvwmlib.h ButtonArray.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/extras/FvwmWharf/Makefile.in fvwm-2.2.4.utf/extras/FvwmWharf/Makefile.in
+--- fvwm-2.2.4/extras/FvwmWharf/Makefile.in	Tue Nov 30 10:04:11 1999
++++ fvwm-2.2.4.utf/extras/FvwmWharf/Makefile.in	Sat Apr  7 19:26:42 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmWharf
+@@ -266,18 +268,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-FvwmWharf.o: FvwmWharf.c ../../config.h ../../fvwm/module.h Wharf.h \
+-	../../libs/fvwmlib.h stepgfx.h
+-icons.o: icons.c ../../config.h Wharf.h ../../libs/fvwmlib.h stepgfx.h
+-stepgfx.o: stepgfx.c
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/extras/Makefile.in fvwm-2.2.4.utf/extras/Makefile.in
+--- fvwm-2.2.4/extras/Makefile.in	Tue Nov 30 10:03:53 1999
++++ fvwm-2.2.4.utf/extras/Makefile.in	Sat Apr  7 19:24:34 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ SUBDIRS = FvwmCommand @FVWMCONFIG@ FvwmConsole FvwmDebug 	FvwmGoodStuff FvwmPipe @FVWMSCRIPT@ FvwmTaskBar FvwmWharf
+ 
+@@ -204,7 +206,7 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+diff -uNr fvwm-2.2.4/fvwm/Makefile.am fvwm-2.2.4.utf/fvwm/Makefile.am
+--- fvwm-2.2.4/fvwm/Makefile.am	Wed Jan 20 02:04:48 1999
++++ fvwm-2.2.4.utf/fvwm/Makefile.am	Sat Apr  7 15:21:52 2001
+@@ -14,10 +14,10 @@
+ 
+ fvwm2_DEPENDENCIES = $(top_builddir)/libs/libfvwm.a
+ 
+-LDADD = -L$(top_builddir)/libs -lfvwm $(xpm_LIBS) \
++LDADD = -L$(top_builddir)/libs -lfvwm $(xpm_LIBS) $(xutf_LIBS)\
+ 	$(X_LIBS) $(X_PRE_LIBS) -lXext -lX11 $(X_EXTRA_LIBS)
+ 
+-INCLUDES = -I$(top_srcdir)/libs $(xpm_CFLAGS) $(X_CFLAGS)
++INCLUDES = -I$(top_srcdir)/libs $(xpm_CFLAGS) $(xutf_CFLAGS) $(X_CFLAGS)
+ 
+ # These three files hardcode one or more of the following:
+ # FVWMRC         = filename suffix for read command
+diff -uNr fvwm-2.2.4/fvwm/Makefile.in fvwm-2.2.4.utf/fvwm/Makefile.in
+--- fvwm-2.2.4/fvwm/Makefile.in	Tue Nov 30 10:02:46 1999
++++ fvwm-2.2.4.utf/fvwm/Makefile.in	Sat Apr  7 17:02:22 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ bin_PROGRAMS = fvwm2
+ 
+@@ -93,10 +95,10 @@
+ 
+ fvwm2_DEPENDENCIES = $(top_builddir)/libs/libfvwm.a
+ 
+-LDADD = -L$(top_builddir)/libs -lfvwm $(xpm_LIBS) 	$(X_LIBS) $(X_PRE_LIBS) -lXext -lX11 $(X_EXTRA_LIBS)
++LDADD = -L$(top_builddir)/libs -lfvwm $(xpm_LIBS) $(xutf_LIBS) 	$(X_LIBS) $(X_PRE_LIBS) -lXext -lX11 $(X_EXTRA_LIBS)
+ 
+ 
+-INCLUDES = -I$(top_srcdir)/libs $(xpm_CFLAGS) $(X_CFLAGS)
++INCLUDES = -I$(top_srcdir)/libs $(xpm_CFLAGS) $(xutf_CFLAGS) $(X_CFLAGS)
+ mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+ CONFIG_HEADER = ../config.h
+ CONFIG_CLEAN_FILES = 
+@@ -270,59 +272,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-add_window.o: add_window.c ../config.h fvwm.h ../libs/fvwmlib.h \
+-	fvwmdebug.h screen.h misc.h defaults.h menus.h module.h
+-bindings.o: bindings.c ../config.h fvwm.h ../libs/fvwmlib.h fvwmdebug.h \
+-	misc.h defaults.h menus.h parse.h screen.h module.h
+-borders.o: borders.c ../config.h fvwm.h ../libs/fvwmlib.h fvwmdebug.h \
+-	misc.h defaults.h menus.h parse.h screen.h module.h
+-colormaps.o: colormaps.c ../config.h fvwm.h ../libs/fvwmlib.h \
+-	fvwmdebug.h misc.h defaults.h menus.h parse.h screen.h module.h
+-colors.o: colors.c ../config.h fvwm.h ../libs/fvwmlib.h fvwmdebug.h \
+-	menus.h misc.h defaults.h parse.h screen.h
+-complex.o: complex.c ../config.h fvwm.h ../libs/fvwmlib.h fvwmdebug.h \
+-	menus.h misc.h defaults.h parse.h screen.h module.h
+-decorations.o: decorations.c ../config.h fvwm.h ../libs/fvwmlib.h \
+-	fvwmdebug.h misc.h defaults.h menus.h screen.h parse.h \
+-	../libs/lang-strings.h
+-events.o: events.c ../config.h fvwm.h ../libs/fvwmlib.h fvwmdebug.h \
+-	menus.h misc.h defaults.h parse.h screen.h module.h
+-focus.o: focus.c ../config.h fvwm.h ../libs/fvwmlib.h fvwmdebug.h \
+-	menus.h misc.h defaults.h parse.h screen.h module.h
+-functions.o: functions.c ../config.h fvwm.h ../libs/fvwmlib.h \
+-	fvwmdebug.h menus.h misc.h defaults.h parse.h screen.h module.h
+-fvwmdebug.o: fvwmdebug.c ../config.h fvwm.h ../libs/fvwmlib.h \
+-	fvwmdebug.h
+-icons.o: icons.c ../config.h fvwm.h ../libs/fvwmlib.h fvwmdebug.h misc.h \
+-	defaults.h menus.h parse.h screen.h module.h
+-menus.o: menus.c ../config.h fvwm.h ../libs/fvwmlib.h fvwmdebug.h \
+-	menus.h misc.h defaults.h parse.h screen.h
+-misc.o: misc.c ../config.h fvwm.h ../libs/fvwmlib.h fvwmdebug.h menus.h \
+-	misc.h defaults.h parse.h screen.h module.h
+-modconf.o: modconf.c ../config.h fvwm.h ../libs/fvwmlib.h fvwmdebug.h \
+-	menus.h misc.h defaults.h parse.h screen.h module.h
+-module.o: module.c ../config.h fvwm.h ../libs/fvwmlib.h fvwmdebug.h \
+-	menus.h misc.h defaults.h parse.h screen.h module.h
+-move.o: move.c ../config.h fvwm.h ../libs/fvwmlib.h fvwmdebug.h menus.h \
+-	misc.h defaults.h parse.h screen.h module.h
+-placement.o: placement.c ../config.h fvwm.h ../libs/fvwmlib.h \
+-	fvwmdebug.h menus.h misc.h defaults.h parse.h screen.h
+-resize.o: resize.c ../config.h fvwm.h ../libs/fvwmlib.h fvwmdebug.h \
+-	misc.h defaults.h menus.h screen.h parse.h
+-style.o: style.c ../config.h fvwm.h ../libs/fvwmlib.h fvwmdebug.h \
+-	menus.h misc.h defaults.h parse.h screen.h
+-virtual.o: virtual.c ../config.h fvwm.h ../libs/fvwmlib.h fvwmdebug.h \
+-	menus.h misc.h defaults.h parse.h screen.h module.h
+-windows.o: windows.c ../config.h ../libs/fvwmlib.h fvwm.h fvwmdebug.h \
+-	menus.h misc.h defaults.h parse.h screen.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/fvwm/borders.c fvwm-2.2.4.utf/fvwm/borders.c
+--- fvwm-2.2.4/fvwm/borders.c	Sun Feb 14 16:48:56 1999
++++ fvwm-2.2.4.utf/fvwm/borders.c	Sat Apr  7 17:36:11 2001
+@@ -29,6 +29,10 @@
+ #include <X11/extensions/shape.h>
+ #endif
+ 
++#if HAVE_XUTF
++#define XTextWidth XUtf8TextWidth
++#endif
++
+ void DrawButton(FvwmWindow *t,
+                 Window win,
+                 int W,
+@@ -807,9 +811,16 @@
+     XDrawLine(dpy,t->title_w,ShadowGC,hor_off+w+1,0,hor_off+w+1,
+               t->title_height);
+     if(t->name != (char *)NULL)
++#if HAVE_XUTF
++      XUtf8DrawString(dpy, t->title_w, GetDecor(t,WindowFont.font),
++			Scr.ScratchGC3,hor_off,
++			GetDecor(t,WindowFont.y)+1,
++			t->name, strlen(t->name));
++#else
+       XDrawString (dpy, t->title_w,Scr.ScratchGC3,hor_off,
+                    GetDecor(t,WindowFont.y)+1,
+                    t->name, strlen(t->name));
++#endif
+   }
+   else
+   {
+@@ -841,9 +852,16 @@
+       }
+ 
+       if(t->name != (char *)NULL)
++#if HAVE_XUTF
++	XUtf8DrawString(dpy, t->title_w, GetDecor(t,WindowFont.font),
++		Scr.ScratchGC3,hor_off,
++		GetDecor(t,WindowFont.y)+1,
++		t->name, strlen(t->name));
++#else
+         XDrawString (dpy, t->title_w,Scr.ScratchGC3,hor_off,
+                      GetDecor(t,WindowFont.y)+1,
+                      t->name, strlen(t->name));
++#endif
+   }
+   /* now, draw lines in title bar if it's a sticky window */
+   if(t->flags & STICKY || Scr.StipledTitles)
+diff -uNr fvwm-2.2.4/fvwm/builtins.c fvwm-2.2.4.utf/fvwm/builtins.c
+--- fvwm-2.2.4/fvwm/builtins.c	Sat Apr  7 18:26:27 2001
++++ fvwm-2.2.4.utf/fvwm/builtins.c	Sat Apr  7 17:54:28 2001
+@@ -39,6 +39,11 @@
+ #endif
+ };
+ 
++#if HAVE_XUTF
++#define XTextWidth XUtf8TextWidth
++#endif
++
++
+ /***********************************************************************
+  *
+  *  Procedure:
+@@ -1823,7 +1828,11 @@
+   Bool is_default_style = False;
+   int val[2];
+   int n;
++#if HAVE_XUTF
++  XUtf8FontStruct *xfs = NULL;
++#else
+   XFontStruct *xfs = NULL;
++#endif
+   int i;
+ 
+   action = GetNextToken(action, &name);
+@@ -1925,7 +1934,11 @@
+ 	tmpms->look.face.type = SimpleMenu;
+ 	if (tmpms->look.pStdFont && tmpms->look.pStdFont != &Scr.StdFont)
+ 	{
++#if HAVE_XUTF
++    	  XFreeUtf8FontStruct(dpy, tmpms->look.pStdFont->font);
++#else
+ 	  XFreeFont(dpy, tmpms->look.pStdFont->font);
++#endif
+ 	  free(tmpms->look.pStdFont);
+ 	}
+ 	tmpms->look.pStdFont = &Scr.StdFont;
+@@ -2054,7 +2067,11 @@
+ 	if (tmpms->look.pStdFont && tmpms->look.pStdFont != &Scr.StdFont)
+ 	{
+ 	  if (tmpms->look.pStdFont->font != NULL)
++#if HAVE_XUTF
++            XFreeUtf8FontStruct(dpy, tmpms->look.pStdFont->font);
++#else
+ 	    XFreeFont(dpy, tmpms->look.pStdFont->font);
++#endif
+ 	  free(tmpms->look.pStdFont);
+ 	}
+ 	if (arg1 == NULL)
+@@ -2694,7 +2711,11 @@
+ 		     unsigned long context, char *action,int* Module)
+ {
+   char *font;
++#if HAVE_XUTF
++  XUtf8FontStruct *xfs = NULL;
++#else
+   XFontStruct *xfs = NULL;
++#endif
+ 
+   action = GetNextToken(action,&font);
+   if (!font)
+@@ -2715,7 +2736,11 @@
+   }
+   free(font);
+   if (Scr.StdFont.font != NULL)
++#if HAVE_XUTF
++    XFreeUtf8FontStruct(dpy, Scr.StdFont.font);
++#else
+     XFreeFont(dpy, Scr.StdFont.font);
++#endif
+   Scr.StdFont.font = xfs;
+ 
+   ApplyDefaultFontAndColors();
+@@ -2745,7 +2770,11 @@
+                   unsigned long context, char *action,int* Module)
+ {
+   char *font;
++#if HAVE_XUTF
++  XUtf8FontStruct *newfont;
++#else
+   XFontStruct *newfont;
++#endif
+ 
+   action = GetNextToken(action,&font);
+   if (!font)
+@@ -2753,7 +2782,11 @@
+     if (Scr.hasIconFont == True)
+     {
+       /* reset to default font */
++#if HAVE_XUTF
++      XFreeUtf8FontStruct(dpy, Scr.IconFont.font);
++#else
+       XFreeFont(dpy, Scr.IconFont.font);
++#endif
+       Scr.hasIconFont = False;
+     }
+     Scr.IconFont.font = Scr.StdFont.font;
+@@ -2764,7 +2797,11 @@
+   if ((newfont = GetFontOrFixed(dpy, font))!=NULL)
+   {
+     if (Scr.IconFont.font != NULL && Scr.hasIconFont == True)
++#if HAVE_XUTF
++      XFreeUtf8FontStruct(dpy, Scr.IconFont.font);
++#else
+       XFreeFont(dpy, Scr.IconFont.font);
++#endif
+     Scr.hasIconFont = True;
+     Scr.IconFont.font = newfont;
+     ApplyIconFont();
+@@ -2821,7 +2858,11 @@
+                     unsigned long context, char *action,int* Module)
+ {
+   char *font;
++#if HAVE_XUTF
++  XUtf8FontStruct *newfont;
++#else
+   XFontStruct *newfont;
++#endif
+ #ifdef USEDECOR
+   FvwmDecor *fl = cur_decor ? cur_decor : &Scr.DefaultDecor;
+ #else
+@@ -2834,7 +2875,11 @@
+     /* reset to default font */
+     if (Scr.hasWindowFont)
+     {
++#if HAVE_XUTF
++      XFreeUtf8FontStruct(dpy, Scr.DefaultDecor.WindowFont.font);
++#else
+       XFreeFont(dpy, Scr.DefaultDecor.WindowFont.font);
++#endif
+       Scr.hasWindowFont = False;
+       fl->WindowFont.font = Scr.StdFont.font;
+       ApplyWindowFont(&Scr.DefaultDecor);
+@@ -2846,7 +2891,12 @@
+   {
+     if (fl->WindowFont.font != NULL &&
+ 	(fl != &Scr.DefaultDecor || Scr.hasWindowFont == True))
++#if HAVE_XUTF
++      XFreeUtf8FontStruct(dpy, fl->WindowFont.font);
++#else
+       XFreeFont(dpy, fl->WindowFont.font);
++#endif
++
+     if (fl == &Scr.DefaultDecor)
+       Scr.hasWindowFont = True;
+     fl->WindowFont.font = newfont;
+diff -uNr fvwm-2.2.4/fvwm/fvwm.c fvwm-2.2.4.utf/fvwm/fvwm.c
+--- fvwm-2.2.4/fvwm/fvwm.c	Sat Apr  7 18:26:27 2001
++++ fvwm-2.2.4.utf/fvwm/fvwm.c	Sat Apr  7 17:19:05 2001
+@@ -42,6 +42,9 @@
+ 
+ #define MAXHOSTNAME 255
+ 
++#if HAVE_XUTF
++#define XTextWidth XUtf8TextWidth
++#endif
+ 
+ #ifndef lint
+ static char sccsid[] = "@(#)fvwm.c " VERSION " " __DATE__ " fvwm";
+@@ -1196,7 +1199,11 @@
+       fl->HiShadowGC = NULL;
+   }
+   if (fl->WindowFont.font != NULL)
++#if HAVE_XUTF
++    XFreeUtf8FontStruct(dpy, fl->WindowFont.font);
++#else
+     XFreeFont(dpy, fl->WindowFont.font);
++#endif
+ }
+ 
+ /***********************************************************************
+diff -uNr fvwm-2.2.4/fvwm/fvwm.h fvwm-2.2.4.utf/fvwm/fvwm.h
+--- fvwm-2.2.4/fvwm/fvwm.h	Tue Jan 12 22:07:42 1999
++++ fvwm-2.2.4.utf/fvwm/fvwm.h	Sat Apr  7 17:37:45 2001
+@@ -41,6 +41,10 @@
+ #include <X11/Xutil.h>
+ #include <X11/cursorfont.h>
+ 
++#if HAVE_XUTF
++#include <libXutf8/Xutf8.h>
++#endif
++ 
+ #ifndef WithdrawnState
+ #define WithdrawnState 0
+ #endif
+@@ -98,7 +102,11 @@
+ 
+ typedef struct MyFont
+ {
++#if HAVE_XUTF
++  XUtf8FontStruct *font;
++#else
+   XFontStruct *font;		/* font structure */
++#endif
+   int height;			/* height of the font */
+   int y;			/* Y coordinate to draw characters */
+ } MyFont;
+diff -uNr fvwm-2.2.4/fvwm/icons.c fvwm-2.2.4.utf/fvwm/icons.c
+--- fvwm-2.2.4/fvwm/icons.c	Thu Jan 14 02:42:52 1999
++++ fvwm-2.2.4.utf/fvwm/icons.c	Sat Apr  7 17:40:54 2001
+@@ -36,6 +36,9 @@
+ #include <X11/extensions/shape.h>
+ #endif /* SHAPE */
+ 
++#if HAVE_XUTF
++#define XTextWidth XUtf8TextWidth
++#endif
+ 
+ void GrabIconButtons(FvwmWindow *, Window);
+ void GrabIconKeys(FvwmWindow *, Window);
+@@ -316,11 +319,18 @@
+       /* text position */
+       x = (Tmp_win->icon_w_width - Tmp_win->icon_t_width)/2;
+       if(x<3)x=3;
+-
++#if HAVE_XUTF
++      XUtf8DrawString(dpy, Tmp_win->icon_w, Scr.IconFont.font,
++		Scr.ScratchGC3, x,
++		Tmp_win->icon_w_height-Scr.IconFont.height+
++		Scr.IconFont.y-3,
++		Tmp_win->icon_name, strlen(Tmp_win->icon_name));
++#else
+       XDrawString (dpy, Tmp_win->icon_w, Scr.ScratchGC3, x,
+                    Tmp_win->icon_w_height-Scr.IconFont.height+
+ 		   Scr.IconFont.y-3,
+                    Tmp_win->icon_name, strlen(Tmp_win->icon_name));
++#endif
+       RelieveWindow(Tmp_win,Tmp_win->icon_w,0,0,Tmp_win->icon_w_width,
+                     ICON_HEIGHT,Relief,Shadow, FULL_HILITE);
+     }
+diff -uNr fvwm-2.2.4/fvwm/menus.c fvwm-2.2.4.utf/fvwm/menus.c
+--- fvwm-2.2.4/fvwm/menus.c	Wed Sep 29 18:33:38 1999
++++ fvwm-2.2.4.utf/fvwm/menus.c	Sat Apr  7 17:45:49 2001
+@@ -127,6 +127,10 @@
+ #define IS_UP_MENU(menu) ((menu)->flags.f.is_up)
+ #define IS_DOWN_MENU(menu) ((menu)->flags.f.is_down)
+ 
++#if HAVE_XUTF
++#define XTextWidth XUtf8TextWidth
++#endif
++
+ /****************************************************************************
+  *
+  * Initiates a menu pop-up
+@@ -1749,11 +1753,22 @@
+     currentGC = mr->ms->look.MenuReliefGC;
+ 
+   if(*mi->item)
++#if HAVE_XUTF
++    XUtf8DrawString(dpy, mr->w, mr->ms->look.pStdFont->font,
++		currentGC,mi->x+mr->xoffset,text_y, mi->item, mi->strlen);
++#else
+     XDrawString(dpy, mr->w,currentGC,mi->x+mr->xoffset,text_y, mi->item,
+ 		mi->strlen);
++#endif
++
+   if(mi->strlen2>0)
++#if HAVE_XUTF
++    XUtf8DrawString(dpy, mr->w, mr->ms->look.pStdFont->font,
++		currentGC,mi->x2+mr->xoffset,text_y, mi->item2, mi->strlen2);
++#else
+     XDrawString(dpy, mr->w,currentGC,mi->x2+mr->xoffset,text_y, mi->item2,
+ 		mi->strlen2);
++#endif
+ 
+   /* pete@tecc.co.uk: If the item has a hot key, underline it */
+   if (mi->hotkey > 0)
+diff -uNr fvwm-2.2.4/fvwm/move.c fvwm-2.2.4.utf/fvwm/move.c
+--- fvwm-2.2.4/fvwm/move.c	Wed Sep 29 18:33:45 1999
++++ fvwm-2.2.4.utf/fvwm/move.c	Sat Apr  7 17:47:49 2001
+@@ -26,6 +26,10 @@
+ #include "screen.h"
+ #include "module.h"
+ 
++#if HAVE_XUTF
++#define XTextWidth XUtf8TextWidth
++#endif
++
+ extern XEvent Event;
+ extern int menuFromFrameOrWindowOrTitlebar;
+ Bool NeedToResizeToo;
+@@ -658,10 +662,17 @@
+ 
+   offset = (Scr.SizeStringWidth + SIZE_HINDENT*2
+ 	    - XTextWidth(Scr.StdFont.font,str,strlen(str)))/2;
++#if HAVE_XUTF
++  XUtf8DrawString(dpy, Scr.SizeWindow, Scr.StdFont.font,
++		Scr.StdGC, offset,
++		Scr.StdFont.font->ascent + SIZE_VINDENT,
++		str, strlen(str));
++#else
+   XDrawString (dpy, Scr.SizeWindow, Scr.StdGC,
+ 	       offset,
+ 	       Scr.StdFont.font->ascent + SIZE_VINDENT,
+ 	       str, strlen(str));
++#endif
+ }
+ 
+ 
+diff -uNr fvwm-2.2.4/fvwm/resize.c fvwm-2.2.4.utf/fvwm/resize.c
+--- fvwm-2.2.4/fvwm/resize.c	Sun Feb 14 16:48:56 1999
++++ fvwm-2.2.4.utf/fvwm/resize.c	Sat Apr  7 17:49:25 2001
+@@ -22,6 +22,10 @@
+ #include "screen.h"
+ #include "parse.h"
+ 
++#if HAVE_XUTF
++#define XTextWidth XUtf8TextWidth
++#endif
++
+ typedef struct geom
+ {
+   int x;
+@@ -444,9 +448,14 @@
+       XClearArea(dpy, Scr.SizeWindow, SIZE_HINDENT, SIZE_VINDENT,
+ 		 Scr.SizeStringWidth, Scr.StdFont.height,False);
+     }
+-
++#if HAVE_XUTF
++  XUtf8DrawString(dpy, Scr.SizeWindow, Scr.StdFont.font,
++		Scr.StdGC,
++		offset, Scr.StdFont.font->ascent + SIZE_VINDENT, str, 13);
++#else
+   XDrawString (dpy, Scr.SizeWindow, Scr.StdGC,
+ 	       offset, Scr.StdFont.font->ascent + SIZE_VINDENT, str, 13);
++#endif
+ }
+ 
+ /***********************************************************************
+diff -uNr fvwm-2.2.4/icons/Makefile.in fvwm-2.2.4.utf/icons/Makefile.in
+--- fvwm-2.2.4/icons/Makefile.in	Tue Nov 30 10:04:15 1999
++++ fvwm-2.2.4.utf/icons/Makefile.in	Sat Apr  7 17:06:29 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ EXTRA_DIST = Jlock.xpm Jnews.xpm Jrecycle.xpm Jxlock.xpm Monitor.xpm 	   Mosaic.xpm README.mini arrdown2.xpm arrows2.xpm arrup2.xpm 	   bomb.xpm button-close.xpm button-max.xpm button.xpm 	   button-horiz.xpm button-vert.xpm 	   ccode.icon clamp.xpm colormap.xpm datebook.xpm default.xbm 	   desk.xpm dialog_box.xpm doomface.xpm editres.xpm eps.xpm 	   exit.xpm flow_chart.xpm folder2.xpm folders.xpm fvwm.bitmap 	   fvwm.xpm fvwm2.xpm fvwm2_big.xpm fvwm3.xpm gnu-animal.xpm 	   graphs.xpm hcode.icon jball.xpm jbomb.xpm jbook1.xpm 	   jbook2.xpm jcalc.xpm jclock.xpm jf.xpm jgraph.xpm jline.xpm 	   jlower.xpm jmag.xpm jmail.xpm jmove.xpm jpaint.xpm 	   jraise.xpm jresize.xpm jterm.xpm jwindow.xpm jx.xpm 	   mag_glass.xpm mail1.xpm mail2.xpm map.xpm math4.xpm 	   mini.audiovol.xpm mini.blah.xpm mini.bomb.xpm 	   mini.checkmark.xpm mini.cut.xpm mini.destroy.xpm 	   mini.directory.xpm mini.dirlink.xpm mini.excl.xpm 	   mini.exit.xpm mini.eye.xpm mini.file.xpm mini.filelink.xpm 	   mini.fvwm.xpm mini.iconify.xpm mini.letter.xpm 	   mini.lower.xpm mini.maximize-horiz.xpm 	   mini.maximize-vert.xpm mini.maximize.xpm mini.maximize2.xpm 	   mini.move.xpm mini.netscape.xpm mini.rainbow.xpm 	   mini.raise.xpm mini.refresh.xpm mini.resize.xpm 	   mini.resize2.xpm mini.stick.xpm mini.stick2.xpm 	   mini.stickpressed.xpm mini.winXX-close.xpm 	   mini.winXX-maximize.xpm mini.winXX-minimize.xpm 	   mini.xarchie.xpm mini.xbiff.xpm mini.xboing.xpm 	   mini.xlock.xpm mini.xmag.xpm mini.xman.xpm mini.xpaint.xpm 	   mini.xpm mini.xterm.xpm mini.zircon.xpm ocode.icon page.xpm 	   page2.xpm prog.icon ps.xpm question.xpm rbomb.xpm rcalc.xpm 	   rterm.xpm side.fvwm2.xpm term.xpm tiff2.xpm toolbox.xpm 	   unknown1.xpm 	   wierd_page3.xpm word_processor.xpm world.xpm xcalc.xpm 	   xemacs.xpm xlock.xpm xman.xpm xpaint.xpm xterm-axp.xpm 	   xterm-blank.xpm xterm-bsd.xpm xterm-dec.xpm xterm-linux.xpm 	   xterm-sgi.xpm xterm-sol.xpm xterm-sun.xpm xterm.xpm xv.xpm 	   xv2.xpm
+ 
+@@ -116,7 +118,7 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+diff -uNr fvwm-2.2.4/libs/GetFont.c fvwm-2.2.4.utf/libs/GetFont.c
+--- fvwm-2.2.4/libs/GetFont.c	Sat Oct 31 12:52:50 1998
++++ fvwm-2.2.4.utf/libs/GetFont.c	Sat Apr  7 18:18:31 2001
+@@ -9,6 +9,12 @@
+ 
+ #include "fvwmlib.h"
+ 
++#if HAVE_XUTF
++#include <libXutf8/Xutf8.h>
++#define XLoadQueryFont XCreateUtf8FontStruct
++#define XFontStruct XUtf8FontStruct
++#endif
++
+ /*
+ ** loads font or "fixed" on failure
+ */
+diff -uNr fvwm-2.2.4/libs/Makefile.in fvwm-2.2.4.utf/libs/Makefile.in
+--- fvwm-2.2.4/libs/Makefile.in	Tue Nov 30 10:02:41 1999
++++ fvwm-2.2.4.utf/libs/Makefile.in	Sat Apr  7 18:37:30 2001
+@@ -84,6 +84,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ noinst_LIBRARIES = libfvwm.a
+ 
+@@ -208,29 +210,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-ClientMsg.o: ClientMsg.c
+-ColorUtils.o: ColorUtils.c ../config.h fvwmlib.h
+-debug.o: debug.c ../config.h fvwmlib.h
+-envvar.o: envvar.c fvwmlib.h
+-GetFont.o: GetFont.c ../config.h fvwmlib.h
+-Grab.o: Grab.c
+-ModParse.o: ModParse.c fvwmlib.h ModParse.h
+-Module.o: Module.c ../config.h fvwmlib.h ../fvwm/module.h
+-Parse.o: Parse.c ../config.h fvwmlib.h
+-Picture.o: Picture.c ../config.h fvwmlib.h
+-safemalloc.o: safemalloc.c
+-Strings.o: Strings.c fvwmlib.h
+-System.o: System.c ../config.h
+-wild.o: wild.c
+-XResource.o: XResource.c ../config.h fvwmlib.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/libs/fvwmlib.h fvwm-2.2.4.utf/libs/fvwmlib.h
+--- fvwm-2.2.4/libs/fvwmlib.h	Mon Jan 11 06:00:28 1999
++++ fvwm-2.2.4.utf/libs/fvwmlib.h	Sat Apr  7 17:56:30 2001
+@@ -7,6 +7,9 @@
+ #include <X11/Intrinsic.h>              /* needed for xpm.h and Pixel defn */
+ #include <ctype.h>
+ 
++#if HAVE_XUTF
++#include <libXutf8/Xutf8.h>
++#endif
+ /* Allow GCC extensions to work, if you have GCC */
+ 
+ #ifndef __attribute__
+@@ -143,8 +146,11 @@
+ /***********************************************************************
+  * Wrappers around various X11 routines
+  ***********************************************************************/
+-
++#if HAVE_XUTF
++XUtf8FontStruct *GetFontOrFixed(Display *disp, char *fontname);
++#else
+ XFontStruct *GetFontOrFixed(Display *disp, char *fontname);
++#endif
+ 
+ void MyXGrabServer(Display *disp);
+ void MyXUngrabServer(Display *disp);
+diff -uNr fvwm-2.2.4/modules/FvwmAnimate/Makefile.in fvwm-2.2.4.utf/modules/FvwmAnimate/Makefile.in
+--- fvwm-2.2.4/modules/FvwmAnimate/Makefile.in	Tue Nov 30 10:02:53 1999
++++ fvwm-2.2.4.utf/modules/FvwmAnimate/Makefile.in	Sat Apr  7 17:05:55 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmAnimate
+@@ -265,16 +267,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-FvwmAnimate.o: FvwmAnimate.c ../../config.h ../../fvwm/module.h \
+-	../../libs/fvwmlib.h FvwmAnimate.h ../../libs/ModParse.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/modules/FvwmAudio/Makefile.in fvwm-2.2.4.utf/modules/FvwmAudio/Makefile.in
+--- fvwm-2.2.4/modules/FvwmAudio/Makefile.in	Tue Nov 30 10:02:56 1999
++++ fvwm-2.2.4.utf/modules/FvwmAudio/Makefile.in	Sat Apr  7 17:05:56 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmAudio
+@@ -265,16 +267,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-FvwmAudio.o: FvwmAudio.c ../../config.h ../../fvwm/module.h \
+-	../../libs/fvwmlib.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/modules/FvwmAuto/Makefile.in fvwm-2.2.4.utf/modules/FvwmAuto/Makefile.in
+--- fvwm-2.2.4/modules/FvwmAuto/Makefile.in	Tue Nov 30 10:02:59 1999
++++ fvwm-2.2.4.utf/modules/FvwmAuto/Makefile.in	Sat Apr  7 17:05:58 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmAuto
+@@ -265,16 +267,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-FvwmAuto.o: FvwmAuto.c ../../config.h ../../fvwm/module.h \
+-	../../libs/fvwmlib.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/modules/FvwmBacker/Makefile.in fvwm-2.2.4.utf/modules/FvwmBacker/Makefile.in
+--- fvwm-2.2.4/modules/FvwmBacker/Makefile.in	Tue Nov 30 10:03:02 1999
++++ fvwm-2.2.4.utf/modules/FvwmBacker/Makefile.in	Sat Apr  7 17:06:00 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmBacker
+@@ -265,18 +267,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-FvwmBacker.o: FvwmBacker.c ../../config.h ../../fvwm/module.h \
+-	FvwmBacker.h ../../libs/fvwmlib.h Mallocs.h
+-Mallocs.o: Mallocs.c ../../config.h ../../libs/fvwmlib.h
+-root_bits.o: root_bits.c
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/modules/FvwmBanner/Makefile.in fvwm-2.2.4.utf/modules/FvwmBanner/Makefile.in
+--- fvwm-2.2.4/modules/FvwmBanner/Makefile.in	Tue Nov 30 10:03:04 1999
++++ fvwm-2.2.4.utf/modules/FvwmBanner/Makefile.in	Sat Apr  7 17:06:01 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmBanner
+@@ -265,16 +267,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-FvwmBanner.o: FvwmBanner.c ../../config.h ../../libs/fvwmlib.h \
+-	../../icons/fvwm2_big.xpm
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/modules/FvwmButtons/Makefile.in fvwm-2.2.4.utf/modules/FvwmButtons/Makefile.in
+--- fvwm-2.2.4/modules/FvwmButtons/Makefile.in	Tue Nov 30 10:03:07 1999
++++ fvwm-2.2.4.utf/modules/FvwmButtons/Makefile.in	Sat Apr  7 17:06:03 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmButtons
+@@ -266,26 +268,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-button.o: button.c FvwmButtons.h ../../libs/fvwmlib.h button.h
+-draw.o: draw.c ../../config.h FvwmButtons.h ../../libs/fvwmlib.h \
+-	button.h misc.h icons.h draw.h
+-FvwmButtons.o: FvwmButtons.c ../../config.h ../../fvwm/module.h \
+-	../../libs/fvwmlib.h FvwmButtons.h button.h misc.h parse.h \
+-	icons.h draw.h
+-icons.o: icons.c ../../config.h ../../libs/fvwmlib.h FvwmButtons.h \
+-	button.h
+-misc.o: misc.c misc.h
+-output.o: output.c FvwmButtons.h ../../libs/fvwmlib.h button.h
+-parse.o: parse.c ../../config.h FvwmButtons.h ../../libs/fvwmlib.h \
+-	button.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/modules/FvwmCpp/Makefile.in fvwm-2.2.4.utf/modules/FvwmCpp/Makefile.in
+--- fvwm-2.2.4/modules/FvwmCpp/Makefile.in	Tue Nov 30 10:03:11 1999
++++ fvwm-2.2.4.utf/modules/FvwmCpp/Makefile.in	Sat Apr  7 17:06:04 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmCpp
+@@ -265,16 +267,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-FvwmCpp.o: FvwmCpp.c ../../config.h ../../fvwm/module.h FvwmCpp.h \
+-	../../libs/fvwmlib.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/modules/FvwmEvent/Makefile.in fvwm-2.2.4.utf/modules/FvwmEvent/Makefile.in
+--- fvwm-2.2.4/modules/FvwmEvent/Makefile.in	Tue Nov 30 10:03:15 1999
++++ fvwm-2.2.4.utf/modules/FvwmEvent/Makefile.in	Sat Apr  7 17:06:06 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmEvent
+@@ -265,16 +267,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-FvwmEvent.o: FvwmEvent.c ../../config.h ../../fvwm/module.h \
+-	../../libs/fvwmlib.h ../../libs/ModParse.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/modules/FvwmForm/FvwmForm.c fvwm-2.2.4.utf/modules/FvwmForm/FvwmForm.c
+--- fvwm-2.2.4/modules/FvwmForm/FvwmForm.c	Wed Sep 29 18:33:53 1999
++++ fvwm-2.2.4.utf/modules/FvwmForm/FvwmForm.c	Sat Apr  7 19:11:49 2001
+@@ -5,6 +5,12 @@
+  * risk.  Permission to use, modify, and redistribute this program is hereby
+  * given, provided that this copyright is kept intact.
+  */
++
++/*************************
++TODO:
++FIXME: XDrawImageString must be replaced by an utf-8 function !!!
++****************************/
++
+ #include "config.h"
+ 
+ #include "../../libs/fvwmlib.h"
+@@ -168,6 +174,12 @@
+   "fixed",
+   "fixed"
+ };
++
++#if HAVE_XUTF
++#define XFontStruct XUtf8FontStruct
++#define XTextWidth XUtf8TextWidth
++#endif
++
+ Font fonts[3];
+ XFontStruct *xfs[3];
+ 
+@@ -246,7 +258,8 @@
+ /* get the font width, for fixed-width font only */
+ int FontWidth (XFontStruct *xfs)
+ {
+-  return (xfs->per_char[0].width);
++  return XUtf8TextWidth(xfs, "_", 1);
++  /*return (xfs->per_char[0].width); */
+ }
+ 
+ /* read the configuration file */
+diff -uNr fvwm-2.2.4/modules/FvwmForm/Makefile.am fvwm-2.2.4.utf/modules/FvwmForm/Makefile.am
+--- fvwm-2.2.4/modules/FvwmForm/Makefile.am	Wed Jan 20 02:04:55 1999
++++ fvwm-2.2.4.utf/modules/FvwmForm/Makefile.am	Sat Apr  7 18:54:46 2001
+@@ -11,7 +11,7 @@
+ ## Xpm note: while this module may not depend on Xpm explicitly,
+ ## there are sometimes dependencies through functions in libfvwm
+ ## so we might as well link against libXpm, if present.
+-LDADD = -L$(top_builddir)/libs -lfvwm $(xpm_LIBS)  \
++LDADD = -L$(top_builddir)/libs -lfvwm $(xpm_LIBS) $(xutf_LIBS) \
+     $(X_LIBS) $(X_PRE_LIBS) -lXext -lX11 $(X_EXTRA_LIBS)
+ 
+ INCLUDES = -I$(top_srcdir)/libs $(xpm_CFLAGS) $(X_CFLAGS)
+diff -uNr fvwm-2.2.4/modules/FvwmForm/Makefile.in fvwm-2.2.4.utf/modules/FvwmForm/Makefile.in
+--- fvwm-2.2.4/modules/FvwmForm/Makefile.in	Tue Nov 30 10:03:18 1999
++++ fvwm-2.2.4.utf/modules/FvwmForm/Makefile.in	Sat Apr  7 18:54:51 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmForm
+@@ -91,7 +93,7 @@
+ FvwmForm_SOURCES = FvwmForm.c
+ FvwmForm_DEPENDENCIES = $(top_builddir)/libs/libfvwm.a
+ 
+-LDADD = -L$(top_builddir)/libs -lfvwm $(xpm_LIBS)      $(X_LIBS) $(X_PRE_LIBS) -lXext -lX11 $(X_EXTRA_LIBS)
++LDADD = -L$(top_builddir)/libs -lfvwm $(xpm_LIBS) $(xutf_LIBS)     $(X_LIBS) $(X_PRE_LIBS) -lXext -lX11 $(X_EXTRA_LIBS)
+ 
+ 
+ INCLUDES = -I$(top_srcdir)/libs $(xpm_CFLAGS) $(X_CFLAGS)
+@@ -265,15 +267,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-FvwmForm.o: FvwmForm.c ../../config.h ../../libs/fvwmlib.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/modules/FvwmIconBox/Makefile.in fvwm-2.2.4.utf/modules/FvwmIconBox/Makefile.in
+--- fvwm-2.2.4/modules/FvwmIconBox/Makefile.in	Tue Nov 30 10:03:20 1999
++++ fvwm-2.2.4.utf/modules/FvwmIconBox/Makefile.in	Sat Apr  7 17:06:09 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmIconBox
+@@ -265,20 +267,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-FvwmIconBox.o: FvwmIconBox.c ../../config.h ../../fvwm/module.h \
+-	FvwmIconBox.h ../../libs/fvwmlib.h ../../fvwm/fvwm.h \
+-	../../fvwm/../libs/fvwmlib.h ../../fvwm/fvwmdebug.h
+-icons.o: icons.c ../../config.h ../../fvwm/module.h FvwmIconBox.h \
+-	../../libs/fvwmlib.h ../../fvwm/fvwm.h \
+-	../../fvwm/../libs/fvwmlib.h ../../fvwm/fvwmdebug.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/modules/FvwmIconMan/Makefile.in fvwm-2.2.4.utf/modules/FvwmIconMan/Makefile.in
+--- fvwm-2.2.4/modules/FvwmIconMan/Makefile.in	Tue Nov 30 10:03:24 1999
++++ fvwm-2.2.4.utf/modules/FvwmIconMan/Makefile.in	Sat Apr  7 17:06:11 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmIconMan
+@@ -266,36 +268,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-debug.o: debug.c FvwmIconMan.h ../../config.h ../../libs/fvwmlib.h \
+-	debug.h debuglevels.h
+-functions.o: functions.c FvwmIconMan.h ../../config.h \
+-	../../libs/fvwmlib.h debug.h readconfig.h xmanager.h
+-FvwmIconMan.o: FvwmIconMan.c FvwmIconMan.h ../../config.h \
+-	../../libs/fvwmlib.h debug.h readconfig.h x.h xmanager.h \
+-	../../fvwm/module.h
+-fvwm.o: fvwm.c ../../config.h FvwmIconMan.h ../../libs/fvwmlib.h debug.h \
+-	x.h xmanager.h ../../libs/../fvwm/fvwm.h \
+-	../../libs/../fvwm/../libs/fvwmlib.h \
+-	../../libs/../fvwm/fvwmdebug.h ../../libs/../fvwm/module.h
+-globals.o: globals.c FvwmIconMan.h ../../config.h ../../libs/fvwmlib.h \
+-	debug.h xmanager.h readconfig.h
+-readconfig.o: readconfig.c FvwmIconMan.h ../../config.h \
+-	../../libs/fvwmlib.h debug.h readconfig.h
+-winlist.o: winlist.c FvwmIconMan.h ../../config.h ../../libs/fvwmlib.h \
+-	debug.h
+-xmanager.o: xmanager.c ../../config.h FvwmIconMan.h ../../libs/fvwmlib.h \
+-	debug.h x.h xmanager.h ../../fvwm/fvwm.h \
+-	../../fvwm/../libs/fvwmlib.h ../../fvwm/fvwmdebug.h
+-x.o: x.c ../../config.h FvwmIconMan.h ../../libs/fvwmlib.h debug.h \
+-	readconfig.h x.h xmanager.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/modules/FvwmIdent/Makefile.in fvwm-2.2.4.utf/modules/FvwmIdent/Makefile.in
+--- fvwm-2.2.4/modules/FvwmIdent/Makefile.in	Tue Nov 30 10:03:27 1999
++++ fvwm-2.2.4.utf/modules/FvwmIdent/Makefile.in	Sat Apr  7 17:06:12 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmIdent
+@@ -265,16 +267,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-FvwmIdent.o: FvwmIdent.c ../../config.h ../../fvwm/module.h FvwmIdent.h \
+-	../../libs/fvwmlib.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/modules/FvwmM4/Makefile.in fvwm-2.2.4.utf/modules/FvwmM4/Makefile.in
+--- fvwm-2.2.4/modules/FvwmM4/Makefile.in	Tue Nov 30 10:03:29 1999
++++ fvwm-2.2.4.utf/modules/FvwmM4/Makefile.in	Sat Apr  7 17:06:14 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmM4
+@@ -265,16 +267,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-FvwmM4.o: FvwmM4.c ../../config.h ../../fvwm/module.h FvwmM4.h \
+-	../../libs/fvwmlib.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/modules/FvwmPager/FvwmPager.h fvwm-2.2.4.utf/modules/FvwmPager/FvwmPager.h
+--- fvwm-2.2.4/modules/FvwmPager/FvwmPager.h	Wed Dec  9 00:40:57 1998
++++ fvwm-2.2.4.utf/modules/FvwmPager/FvwmPager.h	Sat Apr  7 17:58:41 2001
+@@ -72,7 +72,11 @@
+ {
+   Window w;              /* ID of balloon window */
+   PagerWindow *pw;       /* pager window it's associated with */
++#if HAVE_XUTF
++  XUtf8FontStruct *font;
++#else
+   XFontStruct *font;
++#endif
+   int height;            /* height of balloon window based on font */
+   int border;            /* border width */
+   int yoffset;           /* pixels above (<0) or below (>0) pager win */
+diff -uNr fvwm-2.2.4/modules/FvwmPager/Makefile.am fvwm-2.2.4.utf/modules/FvwmPager/Makefile.am
+--- fvwm-2.2.4/modules/FvwmPager/Makefile.am	Wed Jan 20 02:04:58 1999
++++ fvwm-2.2.4.utf/modules/FvwmPager/Makefile.am	Sat Apr  7 18:09:15 2001
+@@ -11,7 +11,7 @@
+ ## Xpm note: while this module may not depend on Xpm explicitly,
+ ## there are sometimes dependencies through functions in libfvwm
+ ## so we might as well link against libXpm, if present.
+-LDADD = -L$(top_builddir)/libs -lfvwm $(xpm_LIBS)  \
++LDADD = -L$(top_builddir)/libs -lfvwm $(xpm_LIBS) $(xutf_LIBS)  \
+     $(X_LIBS) $(X_PRE_LIBS) -lXext -lX11 $(X_EXTRA_LIBS)
+ 
+ INCLUDES = -I$(top_srcdir)/libs $(xpm_CFLAGS) $(X_CFLAGS)
+diff -uNr fvwm-2.2.4/modules/FvwmPager/Makefile.in fvwm-2.2.4.utf/modules/FvwmPager/Makefile.in
+--- fvwm-2.2.4/modules/FvwmPager/Makefile.in	Tue Nov 30 10:03:32 1999
++++ fvwm-2.2.4.utf/modules/FvwmPager/Makefile.in	Sat Apr  7 18:09:30 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmPager
+@@ -91,7 +93,7 @@
+ FvwmPager_SOURCES = FvwmPager.c FvwmPager.h x_pager.c
+ FvwmPager_DEPENDENCIES = $(top_builddir)/libs/libfvwm.a
+ 
+-LDADD = -L$(top_builddir)/libs -lfvwm $(xpm_LIBS)      $(X_LIBS) $(X_PRE_LIBS) -lXext -lX11 $(X_EXTRA_LIBS)
++LDADD = -L$(top_builddir)/libs -lfvwm $(xpm_LIBS) $(xutf_LIBS)      $(X_LIBS) $(X_PRE_LIBS) -lXext -lX11 $(X_EXTRA_LIBS)
+ 
+ 
+ INCLUDES = -I$(top_srcdir)/libs $(xpm_CFLAGS) $(X_CFLAGS)
+@@ -265,20 +267,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-FvwmPager.o: FvwmPager.c ../../config.h ../../fvwm/module.h \
+-	../../libs/fvwmlib.h FvwmPager.h ../../fvwm/fvwm.h \
+-	../../fvwm/../libs/fvwmlib.h ../../fvwm/fvwmdebug.h
+-x_pager.o: x_pager.c ../../config.h ../../libs/fvwmlib.h \
+-	../../fvwm/fvwm.h ../../fvwm/../libs/fvwmlib.h \
+-	../../fvwm/fvwmdebug.h FvwmPager.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/modules/FvwmPager/x_pager.c fvwm-2.2.4.utf/modules/FvwmPager/x_pager.c
+--- fvwm-2.2.4/modules/FvwmPager/x_pager.c	Fri Oct 15 04:45:15 1999
++++ fvwm-2.2.4.utf/modules/FvwmPager/x_pager.c	Sat Apr  7 18:08:22 2001
+@@ -37,7 +37,11 @@
+ extern int ShowBalloons, ShowPagerBalloons, ShowIconBalloons;
+ 
+ extern int icon_w, icon_h, icon_x, icon_y;
++#if HAVE_XUTF
++XUtf8FontStruct *font, *windowFont;
++#else
+ XFontStruct *font, *windowFont;
++#endif
+ 
+ GC NormalGC,DashedGC,HiliteGC,rvGC;
+ GC StdGC;
+@@ -76,6 +80,11 @@
+ #define s_g_height 4
+ static char s_g_bits[] = {0x01, 0x02, 0x04, 0x08};
+ 
++#if HAVE_XUTF
++#define XTextWidth XUtf8TextWidth
++#define XLoadQueryFont XCreateUtf8FontStruct
++#endif
++
+ 
+ Window		icon_win;               /* icon window */
+ BalloonWindow balloon;            /* balloon window */
+@@ -920,12 +929,23 @@
+   if((w<= desk_w)&&(uselabel))
+     {
+       hor_off = (desk_w -w)/2;
++#if HAVE_XUTF
++      if(i == (Scr.CurrentDesk - desk1))
++	XUtf8DrawString (dpy, Desks[i].title_w, font,
++			rvGC,hor_off,font->ascent +1 ,
++		     	ptr, strlen(ptr));
++      else
++	XUtf8DrawString (dpy, Desks[i].title_w, font,
++			NormalGC,hor_off,font->ascent+1  ,
++		     	ptr, strlen(ptr));
++#else
+       if(i == (Scr.CurrentDesk - desk1))
+ 	XDrawString (dpy, Desks[i].title_w,rvGC,hor_off,font->ascent +1 ,
+ 		     ptr, strlen(ptr));
+       else
+ 	XDrawString (dpy, Desks[i].title_w,NormalGC,hor_off,font->ascent+1  ,
+ 		     ptr, strlen(ptr));
++#endif
+     }
+ }
+ 
+@@ -1645,8 +1665,14 @@
+   if(t->PagerView != None)
+     {
+       XClearWindow(dpy, t->PagerView);
++#if HAVE_XUTF
++      XUtf8DrawString(dpy, t->PagerView, windowFont, 
++		StdGC,2,windowFont->ascent+2 ,
++		t->icon_name, strlen(t->icon_name));
++#else
+       XDrawString (dpy, t->PagerView,StdGC,2,windowFont->ascent+2 ,
+ 			t->icon_name, strlen(t->icon_name));
++#endif
+     }
+ }
+ 
+@@ -1685,9 +1711,14 @@
+ 
+     }
+   XClearWindow(dpy, t->IconView);
++#if HAVE_XUTF
++  XUtf8DrawString (dpy, t->IconView, windowFont,
++		StdGC,2,windowFont->ascent+2 ,
++		t->icon_name, strlen(t->icon_name));
++#else
+   XDrawString (dpy, t->IconView,StdGC,2,windowFont->ascent+2 ,
+ 	       t->icon_name, strlen(t->icon_name));
+-
++#endif
+ }
+ void PictureWindow (PagerWindow *t)
+ {
+@@ -2033,8 +2064,13 @@
+   /* if foreground not set in config make it match pager window */
+   if ( BalloonFore == NULL )
+     XSetForeground(dpy, BalloonGC, balloon.pw->text);
+-
++#if HAVE_XUTF
++  XUtf8DrawString(dpy, balloon.w, balloon.font,
++	BalloonGC, 2, balloon.font->ascent,
++	balloon.pw->icon_name, strlen(balloon.pw->icon_name));
++#else
+   XDrawString(dpy, balloon.w, BalloonGC,
+               2, balloon.font->ascent,
+               balloon.pw->icon_name, strlen(balloon.pw->icon_name));
++#endif
+ }
+diff -uNr fvwm-2.2.4/modules/FvwmRearrange/Makefile.in fvwm-2.2.4.utf/modules/FvwmRearrange/Makefile.in
+--- fvwm-2.2.4/modules/FvwmRearrange/Makefile.in	Tue Nov 30 10:03:36 1999
++++ fvwm-2.2.4.utf/modules/FvwmRearrange/Makefile.in	Sat Apr  7 17:06:17 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmRearrange
+@@ -290,17 +292,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-FvwmRearrange.o: FvwmRearrange.c ../../config.h ../../libs/fvwmlib.h \
+-	../../fvwm/module.h ../../fvwm/fvwm.h \
+-	../../fvwm/../libs/fvwmlib.h ../../fvwm/fvwmdebug.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/modules/FvwmSave/Makefile.in fvwm-2.2.4.utf/modules/FvwmSave/Makefile.in
+--- fvwm-2.2.4/modules/FvwmSave/Makefile.in	Tue Nov 30 10:03:39 1999
++++ fvwm-2.2.4.utf/modules/FvwmSave/Makefile.in	Sat Apr  7 17:06:18 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmSave
+@@ -265,16 +267,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-FvwmSave.o: FvwmSave.c ../../config.h ../../fvwm/module.h FvwmSave.h \
+-	../../libs/fvwmlib.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/modules/FvwmSaveDesk/Makefile.in fvwm-2.2.4.utf/modules/FvwmSaveDesk/Makefile.in
+--- fvwm-2.2.4/modules/FvwmSaveDesk/Makefile.in	Tue Nov 30 10:03:42 1999
++++ fvwm-2.2.4.utf/modules/FvwmSaveDesk/Makefile.in	Sat Apr  7 17:06:20 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmSaveDesk
+@@ -266,16 +268,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-FvwmSaveDesk.o: FvwmSaveDesk.c ../../config.h ../../fvwm/module.h \
+-	FvwmSaveDesk.h ../../libs/fvwmlib.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/modules/FvwmScroll/Makefile.in fvwm-2.2.4.utf/modules/FvwmScroll/Makefile.in
+--- fvwm-2.2.4/modules/FvwmScroll/Makefile.in	Tue Nov 30 10:03:45 1999
++++ fvwm-2.2.4.utf/modules/FvwmScroll/Makefile.in	Sat Apr  7 17:06:21 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmScroll
+@@ -265,18 +267,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-FvwmScroll.o: FvwmScroll.c ../../config.h ../../fvwm/module.h \
+-	FvwmScroll.h ../../libs/fvwmlib.h
+-GrabWindow.o: GrabWindow.c ../../config.h ../../fvwm/module.h \
+-	FvwmScroll.h ../../libs/fvwmlib.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/modules/FvwmTalk/Makefile.in fvwm-2.2.4.utf/modules/FvwmTalk/Makefile.in
+--- fvwm-2.2.4/modules/FvwmTalk/Makefile.in	Tue Nov 30 10:03:48 1999
++++ fvwm-2.2.4.utf/modules/FvwmTalk/Makefile.in	Sat Apr  7 17:06:23 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmTalk
+@@ -265,16 +267,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-FvwmTalk.o: FvwmTalk.c ../../config.h ../../fvwm/module.h FvwmTalk.h \
+-	../../libs/fvwmlib.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/modules/FvwmWinList/Makefile.in fvwm-2.2.4.utf/modules/FvwmWinList/Makefile.in
+--- fvwm-2.2.4/modules/FvwmWinList/Makefile.in	Tue Nov 30 10:03:50 1999
++++ fvwm-2.2.4.utf/modules/FvwmWinList/Makefile.in	Sat Apr  7 17:06:24 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ moduledir = @FVWM_MODULEDIR@
+ module_PROGRAMS = FvwmWinList
+@@ -267,22 +269,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-ButtonArray.o: ButtonArray.c ../../config.h ../../libs/fvwmlib.h \
+-	ButtonArray.h Mallocs.h
+-Colors.o: Colors.c ../../config.h Colors.h
+-FvwmWinList.o: FvwmWinList.c ../../config.h ../../fvwm/module.h \
+-	FvwmWinList.h ../../libs/fvwmlib.h ButtonArray.h List.h \
+-	Colors.h Mallocs.h
+-List.o: List.c ../../config.h List.h Mallocs.h ../../fvwm/module.h
+-Mallocs.o: Mallocs.c ../../config.h ../../libs/fvwmlib.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
+diff -uNr fvwm-2.2.4/modules/Makefile.in fvwm-2.2.4.utf/modules/Makefile.in
+--- fvwm-2.2.4/modules/Makefile.in	Tue Nov 30 10:02:50 1999
++++ fvwm-2.2.4.utf/modules/Makefile.in	Sat Apr  7 17:05:53 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ SUBDIRS = FvwmAnimate FvwmAudio FvwmAuto FvwmBacker @FVWMBANNER@ FvwmButtons 	FvwmCpp FvwmEvent FvwmForm FvwmIconBox FvwmIconMan 	FvwmIdent FvwmM4 FvwmPager FvwmRearrange 	FvwmSave FvwmSaveDesk FvwmScroll 	FvwmTalk FvwmWinList
+ 
+@@ -204,7 +206,7 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+diff -uNr fvwm-2.2.4/sample.fvwmrc/Makefile.in fvwm-2.2.4.utf/sample.fvwmrc/Makefile.in
+--- fvwm-2.2.4/sample.fvwmrc/Makefile.in	Tue Nov 30 10:04:16 1999
++++ fvwm-2.2.4.utf/sample.fvwmrc/Makefile.in	Sat Apr  7 17:06:30 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ EXTRA_DIST = decor_examples new-features system.fvwm2rc 	   system.fvwm2rc-sample-1 system.fvwm2rc-sample-2
+ 
+@@ -116,7 +118,7 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+diff -uNr fvwm-2.2.4/tests/Makefile.in fvwm-2.2.4.utf/tests/Makefile.in
+--- fvwm-2.2.4/tests/Makefile.in	Tue Nov 30 10:04:18 1999
++++ fvwm-2.2.4.utf/tests/Makefile.in	Sat Apr  7 17:06:31 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ EXTRA_DIST = README.test_options test_options
+ mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+@@ -115,7 +117,7 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+diff -uNr fvwm-2.2.4/utils/Makefile.in fvwm-2.2.4.utf/utils/Makefile.in
+--- fvwm-2.2.4/utils/Makefile.in	Sat Apr  7 18:26:27 2001
++++ fvwm-2.2.4.utf/utils/Makefile.in	Sat Apr  7 17:06:26 2001
+@@ -82,6 +82,8 @@
+ rplay_LIBS = @rplay_LIBS@
+ xpm_CFLAGS = @xpm_CFLAGS@
+ xpm_LIBS = @xpm_LIBS@
++xutf_CFLAGS = @xutf_CFLAGS@
++xutf_LIBS = @xutf_LIBS@
+ 
+ bin_PROGRAMS = @XPMROOT@
+ EXTRA_PROGRAMS = xpmroot
+@@ -264,15 +266,13 @@
+ 	@for file in $(DISTFILES); do \
+ 	  d=$(srcdir); \
+ 	  if test -d $$d/$$file; then \
+-	    cp -pr $$/$$file $(distdir)/$$file; \
++	    cp -pr $$d/$$file $(distdir)/$$file; \
+ 	  else \
+ 	    test -f $(distdir)/$$file \
+ 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+ 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+ 	  fi; \
+ 	done
+-xpmroot.o: xpmroot.c ../config.h ../libs/fvwmlib.h
+-
+ info-am:
+ info: info-am
+ dvi-am:
